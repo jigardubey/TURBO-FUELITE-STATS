@@ -44,9 +44,8 @@
     </footer>
 
     <script>
-        // ⚠️ BUS IS EK LINE ME APNI GOOGLE SHEET ID PASTE KAREIN
-        const SHEET_ID = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'; 
-        
+        // Aapki Real Sheet ID maine yahan add kar di hai
+        const SHEET_ID = '14ulllMnFHmcSeMhGlEkLIRXidDd_nRY6NAxUavXzybw'; 
         const SHEET_TITLE = 'Sheet1'; 
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_TITLE}`;
 
@@ -72,7 +71,7 @@
                 createLobbyButtons();
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById('matches-container').innerHTML = `<p class="text-red-500 text-center text-sm">Data load karne me error aaya. Sheet ID ya Share Settings check karein.</p>`;
+                document.getElementById('matches-container').innerHTML = `<p class="text-red-500 text-center text-sm">Data load karne me error aaya. GitHub page ko ek baar hard-refresh karein.</p>`;
             }
         }
 
