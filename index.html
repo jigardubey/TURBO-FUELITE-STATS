@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TURBO FUELITE | Live Stats</title>
+    <title>TURBO FUELITE | Tournament Lobbies</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body { background-color: #0d0f14; color: #e2e8f0; }
-        .tab-btn.active { background-color: #f59e0b; color: #000; font-weight: bold; }
+        .lobby-card { background: #161920; border: 1px border #2d3748; transition: all 0.2s ease; }
+        .lobby-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -15,43 +16,74 @@
     <!-- Header -->
     <header class="bg-[#161920] border-b border-gray-800 p-4 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-amber-500 tracking-wider">TURBO FUELITE</h1>
-            <span class="text-xs bg-amber-500/20 text-amber-500 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Live Admin Connected</span>
+            <h1 onclick="showLobbyList()" class="text-2xl font-black text-amber-500 tracking-wider cursor-pointer">TURBO FUELITE</h1>
+            <span class="text-xs bg-amber-500/20 text-amber-500 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Live Dashboard</span>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="max-w-6xl mx-auto px-4 py-8 text-center">
-        <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-2">LOBBY MATCH <span class="text-amber-500">STATS</span></h2>
-        <p class="text-gray-400 text-xs md:text-sm">Lobby select karke har ek match ke player kills dekhein.</p>
-    </section>
+    <!-- Main Container -->
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- Section 1: Lobbies Selection (Pehle ye dikhega) -->
+        <section id="lobby-selection-view">
+            <h2 class="text-3xl font-extrabold text-white mb-2 text-center">SELECT <span class="text-amber-500">LOBBY / TOURNAMENT</span></h2>
+            <p class="text-gray-400 text-xs md:text-sm text-center mb-8">Matches aur player stats dekhne ke liye kisi ek par click karein.</p>
+            
+            <!-- Lobbies Grid List -->
+            <div id="lobby-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <p class="text-xs text-gray-500 text-center col-span-full">Lobbies loading...</p>
+            </div>
+        </section>
 
-    <!-- Lobby Selector Buttons -->
-    <section class="max-w-6xl mx-auto px-4 mb-6">
-        <div id="lobby-buttons" class="flex justify-center space-x-3 bg-[#161920] p-2 rounded-xl border border-gray-800">
-            <p class="text-xs text-gray-500 p-2">Lobbies loading...</p>
-        </div>
-    </section>
+        <!-- Section 2: Matches Details View (Click karne par ye khulega) -->
+        <section id="match-details-view" class="hidden">
+            <!-- Back Button -->
+            <button onclick="showLobbyList()" class="mb-6 bg-gray-800 hover:bg-amber-500 hover:text-black text-white px-4 py-2 rounded-lg text-sm font-bold transition duration-200 flex items-center gap-2">
+                ⬅️ Back to Lobbies
+            </button>
+            
+            <h2 id="active-lobby-title" class="text-3xl font-black text-amber-500 mb-6 uppercase tracking-wide">--:-- Lobby</h2>
+            
+            <!-- Matches Cards Area -->
+            <div id="matches-container" class="space-y-6">
+                <!-- Data automatic yahan aayega -->
+            </div>
+        </section>
 
-    <!-- Matches Display Area -->
-    <main id="matches-container" class="max-w-6xl mx-auto px-4 space-y-6 mb-16">
-        <!-- Matches data automatic yahan aayega -->
-    </main>
+    </div>
 
     <!-- Footer -->
-    <footer class="text-center py-6 border-t border-gray-800 text-xs text-gray-500">
+    <footer class="text-center py-6 border-t border-gray-800 text-xs text-gray-500 mt-12">
         &copy; 2026 TURBO FUELITE. All Rights Reserved.
     </footer>
 
     <script>
-        // Aapki Real Sheet ID maine yahan add kar di hai
         const SHEET_ID = '14ulllMnFHmcSeMhGlEkLIRXidDd_nRY6NAxUavXzybw'; 
         const SHEET_TITLE = 'Sheet1'; 
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_TITLE}`;
 
         let allData = [];
 
-        // Fetch Data from Google Sheet
+        // Clean Google Date format if Google Sheets sends time as a Date object
+        function cleanLobbyName(name) {
+            if (!name) return '';
+            let str = String(name);
+            if (str.includes("Date(")) {
+                // Extracts hours and minutes from Date(1899,11,30,12,0,0)
+                let parts = str.match(/\d+/g);
+                if (parts && parts.length >= 5) {
+                    let hrs = parseInt(parts[3]);
+                    let mins = parts[4].padStart(2, '0');
+                    let ampm = hrs >= 12 ? 'PM' : 'AM';
+                    hrs = hrs % 12;
+                    hrs = hrs ? hrs : 12; // 0 should be 12
+                    return `${hrs}:${mins} ${ampm}`;
+                }
+            }
+            return str;
+        }
+
+        // Load Data
         async function loadStats() {
             try {
                 const response = await fetch(SHEET_URL);
@@ -60,58 +92,59 @@
                 const rows = jsonData.table.rows;
                 
                 allData = rows.map(row => ({
-                    lobby: row.c[0]?.v || '',
+                    lobby: cleanLobbyName(row.c[0]?.f || row.c[0]?.v),
                     match: row.c[1]?.v || '',
-                    p1_kills: row.c[2]?.v || 0, // Mogambo_kills
-                    p2_kills: row.c[3]?.v || 0, // Raunak_kills
-                    p3_kills: row.c[4]?.v || 0, // Aarus_kills
-                    p4_kills: row.c[5]?.v || 0, // Piyush_kills
-                }));
+                    p1_kills: row.c[2]?.v || 0,
+                    p2_kills: row.c[3]?.v || 0,
+                    p3_kills: row.c[4]?.v || 0,
+                    p4_kills: row.c[5]?.v || 0,
+                })).filter(item => item.lobby !== '');
 
-                createLobbyButtons();
+                renderLobbies();
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById('matches-container').innerHTML = `<p class="text-red-500 text-center text-sm">Data load karne me error aaya. GitHub page ko ek baar hard-refresh karein.</p>`;
+                document.getElementById('lobby-list').innerHTML = `<p class="text-red-500 text-center text-sm col-span-full">Data load karne me error aaya. Refresh karein.</p>`;
             }
         }
 
-        // Generate Buttons
-        function createLobbyButtons() {
-            const lobbies = [...new Set(allData.map(item => item.lobby))].filter(l => l !== '');
-            const btnContainer = document.getElementById('lobby-buttons');
-            btnContainer.innerHTML = '';
+        // Display unique lobbies like folders
+        function renderLobbies() {
+            const uniqueLobbies = [...new Set(allData.map(item => item.lobby))];
+            const listContainer = document.getElementById('lobby-list');
+            listContainer.innerHTML = '';
 
-            if(lobbies.length === 0) {
-                btnContainer.innerHTML = '<p class="text-xs text-gray-500 p-2">No active lobbies found in sheet.</p>';
-                return;
-            }
+            uniqueLobbies.forEach(lobby => {
+                // Count how many matches are in this lobby
+                const matchCount = allData.filter(item => item.lobby === lobby).length;
 
-            lobbies.forEach((lobby, index) => {
-                const btn = document.createElement('button');
-                btn.innerText = `🕒 ${lobby}`;
-                btn.className = `tab-btn w-full py-3 rounded-lg text-sm font-semibold transition duration-200 text-gray-400 hover:text-white`;
-                btn.id = `btn-${lobby.replace(/\s+/g, '')}`;
-                btn.onclick = () => showLobbyMatches(lobby);
-                btnContainer.appendChild(btn);
-
-                if(index === 0) {
-                    btn.classList.add('active');
-                    btn.classList.remove('text-gray-400');
-                    showLobbyMatches(lobby);
-                }
+                const card = document.createElement('div');
+                card.className = "lobby-card p-6 rounded-xl cursor-pointer shadow-lg flex flex-col justify-between h-40";
+                card.onclick = () => openLobbyDetails(lobby);
+                card.innerHTML = `
+                    <div>
+                        <span class="text-2xl">🕒</span>
+                        <h3 class="text-xl font-black text-white mt-2 uppercase tracking-wide">${lobby}</h3>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 border-t border-gray-800 pt-2 text-xs text-amber-500 font-bold">
+                        <span>${matchCount} MATCHES FOUND</span>
+                        <span>VIEW STATS ➡️</span>
+                    </div>
+                `;
+                listContainer.appendChild(card);
             });
         }
 
-        // Show Matches
-        function showLobbyMatches(lobbyName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                btn.classList.add('text-gray-400');
-            });
-            
-            const btnId = `btn-${lobbyName.replace(/\s+/g, '')}`;
-            const targetBtn = document.getElementById(btnId);
-            if(targetBtn) targetBtn.classList.add('active');
+        // Show Lobby List View
+        function showLobbyList() {
+            document.getElementById('lobby-selection-view').classList.remove('hidden');
+            document.getElementById('match-details-view').classList.add('hidden');
+        }
+
+        // Open Matches for specific Lobby
+        function openLobbyDetails(lobbyName) {
+            document.getElementById('lobby-selection-view').classList.add('hidden');
+            document.getElementById('match-details-view').classList.remove('hidden');
+            document.getElementById('active-lobby-title').innerText = `🕒 ${lobbyName} LOBBY`;
 
             const container = document.getElementById('matches-container');
             container.innerHTML = '';
@@ -122,7 +155,7 @@
                 const matchBlock = `
                     <div class="bg-[#161920] border border-gray-800 rounded-xl overflow-hidden shadow-lg">
                         <div class="bg-gradient-to-r from-amber-600 to-amber-500 p-4">
-                            <h3 class="font-black text-black tracking-wide text-sm md:text-lg uppercase">${match.match}</h3>
+                            <h3 class="font-black text-black tracking-wide text-base md:text-lg uppercase">${match.match}</h3>
                         </div>
                         <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                             <!-- Mogambo -->
