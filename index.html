@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Team Esports | Stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0d0f14; color: #e2e8f0; }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <header class="bg-[#161920] border-b border-gray-800 p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-amber-500 tracking-wider">TEAM ESPORTS</h1>
+            <nav class="space-x-4 text-sm font-semibold">
+                <a href="#roster" class="hover:text-amber-500 transition">Roster</a>
+                <a href="#stats" class="hover:text-amber-500 transition">Stats</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="max-w-6xl mx-auto px-4 py-12 text-center">
+        <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-4">TEAM PLAYER <span class="text-amber-500">STATS</span></h2>
+        <p class="text-gray-400 max-w-xl mx-auto text-sm">Apni team ke players aur tournament stats yahan dekhein.</p>
+    </section>
+
+    <section id="roster" class="max-w-6xl mx-auto px-4 py-8">
+        <h3 class="text-2xl font-bold text-amber-500 mb-6 border-l-4 border-amber-500 pl-3">Active Roster</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-[#161920] border border-gray-800 rounded-xl p-4 text-center">
+                <div class="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-full mx-auto mb-3 flex items-center justify-center text-xl font-bold">P1</div>
+                <h4 class="font-bold text-white text-base">PLAYER ONE</h4>
+                <p class="text-xs text-gray-500 font-medium uppercase">IGL</p>
+            </div>
+            <div class="bg-[#161920] border border-gray-800 rounded-xl p-4 text-center">
+                <div class="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-full mx-auto mb-3 flex items-center justify-center text-xl font-bold">P2</div>
+                <h4 class="font-bold text-white text-base">PLAYER TWO</h4>
+                <p class="text-xs text-gray-500 font-medium uppercase">Assaulter</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="stats" class="max-w-6xl mx-auto px-4 py-8 mb-16">
+        <h3 class="text-2xl font-bold text-amber-500 mb-6 border-l-4 border-amber-500 pl-3">Overall Player Stats</h3>
+        <div class="overflow-x-auto bg-[#161920] border border-gray-800 rounded-xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-800 bg-[#1e222b]">
+                        <th class="p-4 font-bold text-gray-300">Player</th>
+                        <th class="p-4 font-bold text-gray-300">Matches</th>
+                        <th class="p-4 font-bold text-gray-300">Kills</th>
+                        <th class="p-4 font-bold text-gray-300">K/D</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800/50">
+                    <tr class="hover:bg-gray-800/30 transition">
+                        <td class="p-4 font-semibold text-white">PLAYER ONE</td>
+                        <td class="p-4 text-gray-400">20</td>
+                        <td class="p-4 text-gray-400">60</td>
+                        <td class="p-4 font-bold text-emerald-400">3.00</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800/30 transition">
+                        <td class="p-4 font-semibold text-white">PLAYER TWO</td>
+                        <td class="p-4 text-gray-400">20</td>
+                        <td class="p-4 text-gray-400">80</td>
+                        <td class="p-4 font-bold text-emerald-400">4.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="text-center py-6 border-t border-gray-800 text-xs text-gray-500">&copy; 2026 Esports Team.</footer>
+</body>
+</html>
+
