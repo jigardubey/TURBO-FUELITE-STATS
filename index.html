@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TURBO FUELITE | Tournament Lobbies</title>
+    <title>TURBO FUELITE | Tournament Stats</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body { background-color: #0d0f14; color: #e2e8f0; }
-        .lobby-card { background: #161920; border: 1px border #2d3748; transition: all 0.2s ease; }
+        .lobby-card { background: #161920; border: 1px solid #2d3748; transition: all 0.2s ease; }
         .lobby-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
     </style>
 </head>
 <body class="font-sans antialiased">
 
-    <!-- Header -->
     <header class="bg-[#161920] border-b border-gray-800 p-4 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 onclick="showLobbyList()" class="text-2xl font-black text-amber-500 tracking-wider cursor-pointer">TURBO FUELITE</h1>
@@ -21,38 +20,53 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="max-w-6xl mx-auto px-4 py-8">
         
-        <!-- Section 1: Lobbies Selection (Pehle ye dikhega) -->
         <section id="lobby-selection-view">
             <h2 class="text-3xl font-extrabold text-white mb-2 text-center">SELECT <span class="text-amber-500">LOBBY / TOURNAMENT</span></h2>
-            <p class="text-gray-400 text-xs md:text-sm text-center mb-8">Matches aur player stats dekhne ke liye kisi ek par click karein.</p>
+            <p class="text-gray-400 text-xs md:text-sm text-center mb-8">Matches aur leaderboard dekhne ke liye kisi ek par click karein.</p>
             
-            <!-- Lobbies Grid List -->
             <div id="lobby-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <p class="text-xs text-gray-500 text-center col-span-full">Lobbies loading...</p>
             </div>
         </section>
 
-        <!-- Section 2: Matches Details View (Click karne par ye khulega) -->
         <section id="match-details-view" class="hidden">
-            <!-- Back Button -->
             <button onclick="showLobbyList()" class="mb-6 bg-gray-800 hover:bg-amber-500 hover:text-black text-white px-4 py-2 rounded-lg text-sm font-bold transition duration-200 flex items-center gap-2">
                 ⬅️ Back to Lobbies
             </button>
             
             <h2 id="active-lobby-title" class="text-3xl font-black text-amber-500 mb-6 uppercase tracking-wide">--:-- Lobby</h2>
             
-            <!-- Matches Cards Area -->
-            <div id="matches-container" class="space-y-6">
-                <!-- Data automatic yahan aayega -->
+            <div id="matches-container" class="space-y-6 mb-12">
+                </div>
+
+            <div class="bg-[#161920] border border-gray-800 rounded-xl overflow-hidden shadow-2xl p-4 md:p-6">
+                <div class="border-b border-gray-800 pb-4 mb-4 flex justify-between items-center">
+                    <h3 class="text-xl font-black text-amber-500 uppercase tracking-wider flex items-center gap-2">🏆 Overall Points Table</h3>
+                    <span class="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded font-bold">Auto-Calculated</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs md:text-sm text-amber-500 font-bold uppercase tracking-wider bg-[#0d0f14]">
+                                <th class="p-3">Player / Team Stats</th>
+                                <th class="p-3 text-center">Matches</th>
+                                <th class="p-3 text-center">Total Kills</th>
+                                <th class="p-3 text-center">Place Points</th>
+                                <th class="p-3 text-center bg-amber-500/10 text-amber-400 font-black">Total Points</th>
+                            </tr>
+                        </thead>
+                        <tbody id="points-table-body" class="text-sm md:text-base text-gray-300">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
     </div>
 
-    <!-- Footer -->
     <footer class="text-center py-6 border-t border-gray-800 text-xs text-gray-500 mt-12">
         &copy; 2026 TURBO FUELITE. All Rights Reserved.
     </footer>
@@ -64,26 +78,23 @@
 
         let allData = [];
 
-        // Clean Google Date format if Google Sheets sends time as a Date object
         function cleanLobbyName(name) {
             if (!name) return '';
             let str = String(name);
             if (str.includes("Date(")) {
-                // Extracts hours and minutes from Date(1899,11,30,12,0,0)
                 let parts = str.match(/\d+/g);
                 if (parts && parts.length >= 5) {
                     let hrs = parseInt(parts[3]);
                     let mins = parts[4].padStart(2, '0');
                     let ampm = hrs >= 12 ? 'PM' : 'AM';
                     hrs = hrs % 12;
-                    hrs = hrs ? hrs : 12; // 0 should be 12
+                    hrs = hrs ? hrs : 12;
                     return `${hrs}:${mins} ${ampm}`;
                 }
             }
             return str;
         }
 
-        // Load Data
         async function loadStats() {
             try {
                 const response = await fetch(SHEET_URL);
@@ -94,27 +105,26 @@
                 allData = rows.map(row => ({
                     lobby: cleanLobbyName(row.c[0]?.f || row.c[0]?.v),
                     match: row.c[1]?.v || '',
-                    p1_kills: row.c[2]?.v || 0,
-                    p2_kills: row.c[3]?.v || 0,
-                    p3_kills: row.c[4]?.v || 0,
-                    p4_kills: row.c[5]?.v || 0,
+                    p1_kills: parseInt(row.c[2]?.v) || 0,
+                    p2_kills: parseInt(row.c[3]?.v) || 0,
+                    p3_kills: parseInt(row.c[4]?.v) || 0,
+                    p4_kills: parseInt(row.c[5]?.v) || 0,
+                    pos_points: parseInt(row.c[6]?.v) || 0, // Column G se Position Points read karega
                 })).filter(item => item.lobby !== '');
 
                 renderLobbies();
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById('lobby-list').innerHTML = `<p class="text-red-500 text-center text-sm col-span-full">Data load karne me error aaya. Refresh karein.</p>`;
+                document.getElementById('lobby-list').innerHTML = `<p class="text-red-500 text-center text-sm col-span-full">Data load karne me error aaya. Settings check karein.</p>`;
             }
         }
 
-        // Display unique lobbies like folders
         function renderLobbies() {
             const uniqueLobbies = [...new Set(allData.map(item => item.lobby))];
             const listContainer = document.getElementById('lobby-list');
             listContainer.innerHTML = '';
 
             uniqueLobbies.forEach(lobby => {
-                // Count how many matches are in this lobby
                 const matchCount = allData.filter(item => item.lobby === lobby).length;
 
                 const card = document.createElement('div');
@@ -134,13 +144,11 @@
             });
         }
 
-        // Show Lobby List View
         function showLobbyList() {
             document.getElementById('lobby-selection-view').classList.remove('hidden');
             document.getElementById('match-details-view').classList.add('hidden');
         }
 
-        // Open Matches for specific Lobby
         function openLobbyDetails(lobbyName) {
             document.getElementById('lobby-selection-view').classList.add('hidden');
             document.getElementById('match-details-view').classList.remove('hidden');
@@ -151,35 +159,39 @@
 
             const filteredMatches = allData.filter(item => item.lobby === lobbyName);
 
+            // Calculations for Points Table
+            let totalP1 = 0, totalP2 = 0, totalP3 = 0, totalP4 = 0;
+            let totalPosPoints = 0;
+            let matchCount = filteredMatches.length;
+
             filteredMatches.forEach(match => {
+                totalP1 += match.p1_kills;
+                totalP2 += match.p2_kills;
+                totalP3 += match.p3_kills;
+                totalP4 += match.p4_kills;
+                totalPosPoints += match.pos_points;
+
                 const matchBlock = `
                     <div class="bg-[#161920] border border-gray-800 rounded-xl overflow-hidden shadow-lg">
-                        <div class="bg-gradient-to-r from-amber-600 to-amber-500 p-4">
-                            <h3 class="font-black text-black tracking-wide text-base md:text-lg uppercase">${match.match}</h3>
+                        <div class="bg-gradient-to-r from-amber-600 to-amber-500 p-3 flex justify-between items-center">
+                            <h3 class="font-black text-black tracking-wide text-sm md:text-base uppercase">${match.match}</h3>
+                            <span class="text-xs bg-black text-amber-500 px-2 py-0.5 rounded font-bold uppercase">Place Pts: ${match.pos_points}</span>
                         </div>
                         <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <!-- Mogambo -->
                             <div class="bg-[#0d0f14] p-3 rounded-lg border border-gray-800 text-center">
                                 <p class="text-sm font-bold text-white truncate">MOGAMBO</p>
-                                <p class="text-xs text-amber-500 font-medium tracking-wider uppercase mb-1">IGL</p>
                                 <p class="text-2xl font-black text-white mt-1">${match.p1_kills} <span class="text-xs font-normal text-gray-400">Kills</span></p>
                             </div>
-                            <!-- Raunak -->
                             <div class="bg-[#0d0f14] p-3 rounded-lg border border-gray-800 text-center">
                                 <p class="text-sm font-bold text-white truncate">RAUNAK</p>
-                                <p class="text-xs text-amber-500 font-medium tracking-wider uppercase mb-1">Rusher</p>
                                 <p class="text-2xl font-black text-white mt-1">${match.p2_kills} <span class="text-xs font-normal text-gray-400">Kills</span></p>
                             </div>
-                            <!-- Aarus -->
                             <div class="bg-[#0d0f14] p-3 rounded-lg border border-gray-800 text-center">
                                 <p class="text-sm font-bold text-white truncate">AARUS</p>
-                                <p class="text-xs text-amber-500 font-medium tracking-wider uppercase mb-1">2nd Rusher</p>
                                 <p class="text-2xl font-black text-white mt-1">${match.p3_kills} <span class="text-xs font-normal text-gray-400">Kills</span></p>
                             </div>
-                            <!-- Piyush -->
                             <div class="bg-[#0d0f14] p-3 rounded-lg border border-gray-800 text-center">
                                 <p class="text-sm font-bold text-white truncate">PIYUSH</p>
-                                <p class="text-xs text-amber-500 font-medium tracking-wider uppercase mb-1">Sniper</p>
                                 <p class="text-2xl font-black text-white mt-1">${match.p4_kills} <span class="text-xs font-normal text-gray-400">Kills</span></p>
                             </div>
                         </div>
@@ -187,6 +199,52 @@
                 `;
                 container.innerHTML += matchBlock;
             });
+
+            // Generating rows for Overall Table
+            const teamTotalKills = totalP1 + totalP2 + totalP3 + totalP4;
+            const overallTotalPoints = teamTotalKills + totalPosPoints;
+
+            const tableBody = document.getElementById('points-table-body');
+            tableBody.innerHTML = `
+                <tr class="border-b border-gray-800 hover:bg-gray-800/30">
+                    <td class="p-3 font-bold text-white">🔥 TURBO FUELITE <span class="text-xs font-normal text-amber-500 block">Full Squad</span></td>
+                    <td class="p-3 text-center">${matchCount}</td>
+                    <td class="p-3 text-center">${teamTotalKills}</td>
+                    <td class="p-3 text-center">${totalPosPoints}</td>
+                    <td class="p-3 text-center bg-amber-500/5 text-amber-400 font-black text-lg">${overallTotalPoints}</td>
+                </tr>
+                <tr class="border-b border-gray-800/50 text-xs text-gray-500 bg-[#0d0f14]/50">
+                    <td colspan="5" class="p-2 pl-3 font-semibold uppercase tracking-wider text-gray-400">Individual Player Contribution (Total Kills):</td>
+                </tr>
+                <tr class="border-b border-gray-800/30 hover:bg-gray-800/20 text-xs md:text-sm">
+                    <td class="p-3 pl-6 text-gray-400">MOGAMBO (IGL)</td>
+                    <td class="p-3 text-center text-gray-500">${matchCount}</td>
+                    <td class="p-3 text-center text-white font-bold">${totalP1}</td>
+                    <td class="p-3 text-center text-gray-600">-</td>
+                    <td class="p-3 text-center text-gray-400">${totalP1}</td>
+                </tr>
+                <tr class="border-b border-gray-800/30 hover:bg-gray-800/20 text-xs md:text-sm">
+                    <td class="p-3 pl-6 text-gray-400">RAUNAK (Rusher)</td>
+                    <td class="p-3 text-center text-gray-500">${matchCount}</td>
+                    <td class="p-3 text-center text-white font-bold">${totalP2}</td>
+                    <td class="p-3 text-center text-gray-600">-</td>
+                    <td class="p-3 text-center text-gray-400">${totalP2}</td>
+                </tr>
+                <tr class="border-b border-gray-800/30 hover:bg-gray-800/20 text-xs md:text-sm">
+                    <td class="p-3 pl-6 text-gray-400">AARUS (2nd Rusher)</td>
+                    <td class="p-3 text-center text-gray-500">${matchCount}</td>
+                    <td class="p-3 text-center text-white font-bold">${totalP3}</td>
+                    <td class="p-3 text-center text-gray-600">-</td>
+                    <td class="p-3 text-center text-gray-400">${totalP3}</td>
+                </tr>
+                <tr class="hover:bg-gray-800/20 text-xs md:text-sm">
+                    <td class="p-3 pl-6 text-gray-400">PIYUSH (Sniper)</td>
+                    <td class="p-3 text-center text-gray-500">${matchCount}</td>
+                    <td class="p-3 text-center text-white font-bold">${totalP4}</td>
+                    <td class="p-3 text-center text-gray-600">-</td>
+                    <td class="p-3 text-center text-gray-400">${totalP4}</td>
+                </tr>
+            `;
         }
 
         loadStats();
